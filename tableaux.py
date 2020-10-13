@@ -46,7 +46,14 @@ def StringtoTree(A):
 ##############################################################################
 # Definición de funciones de tableaux
 ##############################################################################
-
+def complemento(f):
+	if f.label=="-":
+		return f.right
+	elif f.label==None:
+		p=Tree("-",None,f)
+		return p
+	else:
+		return "No es una formula"
 def imprime_hoja(H):
 	cadena = "{"
 	primero = True
