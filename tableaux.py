@@ -70,6 +70,11 @@ def par_complementario(l):
 	# contiene un par complementario
 	# Input: l, una lista de literales
 	# Output: True/False
+	t=True
+	while t:
+		for i in l:
+			if complemento(i) in l:
+				t=False
 	return False
 
 def es_literal(f):
