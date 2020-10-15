@@ -115,6 +115,7 @@ def clasificacion(f):
 		return "3BETA"
 
 def clasifica_y_extiende(f):
+	global listaHojas
 	listaHojas.remove([f])
 	if clasificacion(f)=="1ALFA":
 		t=[f.right]
@@ -129,16 +130,24 @@ def clasifica_y_extiende(f):
 		t=[f.left,Tree("-",None,f.right)
 		listaHojas.append(t)
 	elif clasificacion(f)=="1BETA":
-		   t=[]
+		der=[listaHojas,Tree("-",None,f.right)]
+		izq=[listaHojas,Tree("-",None,f.left)]
+		listaHojas.append(izq)
+		listaHojas.append(der)
 	elif clasificacion(f)=="2BETA":
-		   t=[]
-	elif clasificacion(f)=="3BETA":
-		   t=[]
+		der=[listaHojas,f.right]
+		izq=[listaHojas,f.left]
+		listaHojas.append(izq)
+		listaHojas.append(der)
+	 elif clasificacion(f)=="3BETA":
+		der=[listaHojas,f.right]
+		izq=[listaHojas,Tree("-",None,f.left)]
+		listaHojas.append(izq)
+		listaHojas.append(der)
 	# clasifica una fórmula como alfa o beta y extiende listaHojas
 	# de acuerdo a la regla respectiva
 	# Input: f, una fórmula como árbol
 	# Output: no tiene output, pues modifica la variable global listaHojas
-	global listaHojas
 
 def Tableaux(f):
 
