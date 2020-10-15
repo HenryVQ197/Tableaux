@@ -4,6 +4,8 @@ from random import choice
 # Variables globales
 ##############################################################################
 
+# Crea los conectivos
+conectivos = ['Y', 'O', '>', '=']
 # Crea las letras minúsculas a-z
 letrasProposicionales = [chr(x) for x in range(97, 123)]
 # inicializa la lista de interpretaciones
@@ -32,28 +34,54 @@ def Inorder(f):
 	else:
 		return "(" + Inorder(f.left) + f.label + Inorder(f.right) + ")"
 
-def StringtoTree(A):
-    # Crea una formula como tree dada una formula como cadena escrita en notacion polaca inversa
-    # Input: A, lista de caracteres con una formula escrita en notacion polaca inversa
-             # letrasProposicionales, lista de letras proposicionales
-    # Output: formula como tree
+def String2Tree(A):
+	# Crea una formula como tree dada una formula como cadena escrita en notacion polaca inversa
+	# Input: - A, lista de caracteres con una formula escrita en notacion polaca inversa
+	#        - letrasProposicionales, lista de letras proposicionales
+	#        - conectivos, lista de conectivos
+	# Output: formula como tree
+	pila = []
+	for c in A:
+		# print("Examinando " + str(c))
+		if c in letrasProposicionales:
+			# print(u"El símbolo es letra proposicional")
+			pila.append(Tree(c, None, None))
+		elif c == '-':
+			# print("Negamos")
+			formulaAux = Tree(c, None, pila[-1])
+			del pila[-1]
+			pila.append(formulaAux)
+		elif c in conectivos:
+			# print("Unimos mediante conectivo")
+			formulaAux = Tree(c, pila[-1], pila[-2])
+			del pila[-1]
+			del pila[-1]
+			pila.append(formulaAux)
+		else:
+			print(u"Hay un problema: el símbolo " + str(c) + " no se reconoce")
+	return pila[-1]
 
-	# OJO: DEBE INCLUIR SU CÓDIGO DE STRING2TREE EN ESTA PARTE!!!!!
-
-	p = letrasProposicionales[0] # ELIMINE ESTA LINEA LUEGO DE INCLUIR EL CODIGO DE STRING2TREE
-	return Tree(p, None, None) # ELIMINE ESTA LINEA LUEGO DE INCLUIR EL CODIGO DE STRING2TREE
+def Inorder2Tree(A):
+	if len(A) == 1:
+		return Tree(A[0], None, None)
+	elif A[0] == '-':
+		return Tree(A[0], None, Inorder2Tree(A[1:]))
+	elif A[0] == "(":
+		counter = 0 #Contador de parentesis
+		for i in range(1, len(A)):
+			if A[i] == "(":
+				counter += 1
+			elif A[i] == ")":
+				counter -=1
+			elif (A[i] in ['Y', 'O', '>', '=']) and (counter == 0):
+				return Tree(A[i], Inorder2Tree(A[1:i]), Inorder2Tree(A[i + 1:-1]))
+	else:
+		return -1
 
 ##############################################################################
 # Definición de funciones de tableaux
 ##############################################################################
-def complemento(f):
-	if f.label=="-":
-		return f.right
-	elif f.label==None:
-		p=Tree("-",None,f)
-		return p
-	else:
-		return "No es una formula"
+
 def imprime_hoja(H):
 	cadena = "{"
 	primero = True
@@ -65,54 +93,36 @@ def imprime_hoja(H):
 		cadena += Inorder(f)
 	return cadena + "}"
 
+def imprime_listaHojas(L):
+	for h in L:
+		print(imprime_hoja(h))
+
+def complemento(f):
+	if f.label=="-":
+		return f.right
+	elif f.right==None:
+		p=Tree("-",None,f)
+		return p
+
 def par_complementario(l):
-	# Esta función determina si una lista de solo literales
-	# contiene un par complementario
-	# Input: l, una lista de literales
-	# Output: True/False
-	aux=[inorder(x) for x in l]
+	aux=[Inorder(x) for x in l]
 	for i in l:
-		if inoder(complemento(i)) in aux:
+		if Inorder(complemento(i)) in aux:
 			return True
 	return False
 
 def es_literal(f):
-	# Esta función determina si el árbol f es un literal
-	# Input: f, una fórmula como árbol
-	# Output: True/False
 	if f.right==None:
 		return True
-	elif f.label="-":
+	elif f.label=="-":
 		if f.right.right==None:
 			return True
-	else:
-		return False
+	return False
 
 def no_literales(l):
-	# Esta función determina si una lista de fórmulas contiene
-	# solo literales
-	# Input: l, una lista de fórmulas como árboles
-	# Output: None/f, tal que f no es literal
 	for i in l:
 		if es_literal(i)==False:
-			return False
-	return True
-def clasificacion(f):
-	if f.label=="-":
-		if f.right.label=="-":
-			return "1ALFA"
-		elif f.right.label=="O":
-			return "3ALFA"
-		elif f.right.label==">":
-			return "4ALFA"
-		elif f.right.label=="Y":
-			return "1BETA"
-	elif f.label=="Y":
-		return "2ALFA"
-	elif f.label=="O":
-		return "2BETA"
-	elif f.label==">":
-		return "3BETA"
+			return i
 
 def clasificacion(f):
 	if f.label=="-":
@@ -130,6 +140,7 @@ def clasificacion(f):
 		return "2BETA"
 	elif f.label==">":
 		return "3BETA"
+
 def clasifica_y_extiende(f, h):
 
 	global listaHojas
@@ -178,16 +189,36 @@ def clasifica_y_extiende(f, h):
 		listaHojas.append(auxd)
 		listaHojas.append(auxi)
 
+
 def Tableaux(f):
 
 	# Algoritmo de creacion de tableau a partir de lista_hojas
 	# Imput: - f, una fórmula como string en notación polaca inversa
 	# Output: interpretaciones: lista de listas de literales que hacen
 	#		 verdadera a f
+
 	global listaHojas
 	global listaInterpsVerdaderas
 
-	A = string2Tree(f)
+	A = String2Tree(f)
+	print(u'La fórmula introducida es:\n', Inorder(A))
+
 	listaHojas = [[A]]
 
+	while (len(listaHojas) > 0):
+# 		for i in listaHojas:
+# 			print (Inorder(i))
+		h = choice(listaHojas)
+		print("Trabajando con hoja:\n", imprime_hoja(h))
+		x = no_literales(h)
+		if x == None:
+			if par_complementario(h):
+				listaHojas.remove(h)
+			else:
+				listaInterpsVerdaderas.append(h)
+				listaHojas.remove(h)
+		else:
+			clasifica_y_extiende(x, h)
+
 	return listaInterpsVerdaderas
+
