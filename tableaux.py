@@ -70,27 +70,70 @@ def par_complementario(l):
 	# contiene un par complementario
 	# Input: l, una lista de literales
 	# Output: True/False
-	t=True
-	while t:
-		for i in l:
-			if complemento(i) in l:
-				t=False
+	aux=[inorder(x) for x in l]
+	for i in l:
+		if inoder(complemento(i)) in aux:
+			return True
 	return False
 
 def es_literal(f):
 	# Esta función determina si el árbol f es un literal
 	# Input: f, una fórmula como árbol
 	# Output: True/False
-	return False
+	if f.right==None:
+		return True
+	elif f.label="-":
+		if f.right.right==None:
+			return True
+	else:
+		return False
 
 def no_literales(l):
 	# Esta función determina si una lista de fórmulas contiene
 	# solo literales
 	# Input: l, una lista de fórmulas como árboles
 	# Output: None/f, tal que f no es literal
-	return False
+	for i in l:
+		if es_literal(i)==False:
+			return False
+	return True
+def clasificacion(f):
+	if f.label=="-":
+		if f.right.label=="-":
+			return "1ALFA"
+		elif f.right.label=="O":
+			return "3ALFA"
+		elif f.right.label==">":
+			return "4ALFA"
+		elif f.right.label=="Y":
+			return "1BETA"
+	elif f.label=="Y":
+		return "2ALFA"
+	elif f.label=="O":
+		return "2BETA"
+	elif f.label==">":
+		return "3BETA"
 
 def clasifica_y_extiende(f):
+	listaHojas.remove([f])
+	if clasificacion(f)=="1ALFA":
+		t=[f.right]
+		listaHojas.append(t)
+	elif clasificacion(f)=="2ALFA":
+		t=[f.left,f.right]
+		listaHojas.append(t)
+	elif clasificacion(f)=="3ALFA":
+		t=[Tree("-",None,f.left),Tree("-",None,f.right)]
+		listaHojas.append(t)
+	elif clasificacion(f)=="4ALFA":
+		t=[f.left,Tree("-",None,f.right)
+		listaHojas.append(t)
+	elif clasificacion(f)=="1BETA":
+		   t=[]
+	elif clasificacion(f)=="2BETA":
+		   t=[]
+	elif clasificacion(f)=="3BETA":
+		   t=[]
 	# clasifica una fórmula como alfa o beta y extiende listaHojas
 	# de acuerdo a la regla respectiva
 	# Input: f, una fórmula como árbol
